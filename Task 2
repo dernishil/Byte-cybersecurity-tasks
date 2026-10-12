@@ -1,0 +1,20 @@
+I opened the challenge image and checked its properties. It was a PNG
+file, but common image tools could not decode it properly. This
+suggested that the image structure might be corrupted.
+I started by examining the PNG structure. A PNG file contains chunks
+such as IHDR, IDAT, and IEND. IHDR stores the image dimensions, IDAT
+contains the compressed image data, and IEND marks the end of the image.
+The file had an invalid IHDR CRC and broken chunk boundaries. I tried
+tools such as pngcrush, ImageMagick, binwalk, and PCRT, but these
+attempts did not directly reveal the flag.
+Next, I examined the compressed IDAT data. The IDAT data did not
+decompress correctly at first because a decoy IEND chunk had been
+inserted inside the compressed data. Removing that 12-byte sequence
+restored the compressed stream and allowed its integrity checks to pass.
+The image still had an incorrect height value. The IHDR chunk said the
+image was 724 × 800, but the recovered decompressed data contained 850
+rows. I corrected the height to 850 and recalculated the IHDR CRC.
+I then checked that the scanline filter bytes were valid and opened the
+repaired image. The bottom 50 rows, which had been hidden by the
+incorrect height, contained the flag.
+Final Flag: flag{g0t_1t_in_pLAin_sight}
